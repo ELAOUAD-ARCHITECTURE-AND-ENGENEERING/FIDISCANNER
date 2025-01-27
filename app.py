@@ -1,8 +1,19 @@
-from flask import Flask, request, send_file, url_for
+from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
+from gsheet_func import save_reminder_date
 import qrcode
 import os
+import cloudinary
+import cloudinary.uploader
 
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name="dlonah39r",
+    api_key="557486886891483",
+    api_secret="p5I89-L1C62faI3S6VnyDkBvprM"
+)
+
+# Create Flask app
 app = Flask(__name__)
 
 # Ensure the "static" directory exists
@@ -25,20 +36,22 @@ def reply():
         # Handle name input and generate QR code
         elif incoming_msg.isalpha():  # Check if input is a valid name (letters only)
             name = incoming_msg.capitalize()  # Capitalize the first letter
-            # Inside the elif block where QR code is generated:
+            save_reminder_date(name)
             qr_data = f"Nom: {name}"  # QR code content
             qr_code_path = os.path.join("static", f"{name}_qr.png")
 
             # Generate and save QR code in the static directory
             qr_code = qrcode.make(qr_data)
-            reply = f"{name}_qr.png"
             qr_code.save(qr_code_path)
 
+            # Upload QR code to Cloudinary
+            upload_result = cloudinary.uploader.upload(qr_code_path)
+            qr_url = upload_result['secure_url']  # Get the public URL from Cloudinary
+
             # Send QR code back to user
-            qr_url = url_for('static', filename=f"{name}_qr.png", _external=True)  # Get the external URL for static file
             reply = f"Merci, {name}! Votre nom a été enregistré avec succès. Voici votre QR code :"
             message.body(reply)
-            message.media(qr_url)  # Twilio will send the image to the user
+            message.media(qr_url)  # Send the image URL to Twilio
 
         else:
             reply = "Entrée non valide. Veuillez entrer un nom valide (seulement des lettres)."

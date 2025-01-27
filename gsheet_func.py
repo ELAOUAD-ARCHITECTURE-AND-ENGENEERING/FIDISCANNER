@@ -28,12 +28,6 @@ def save_reminder_date(date):
     global row_filled  # Update row_filled after adding a row
     sheet.update_cell(row_filled + 1, 1, date)
     row_filled += 1
-    print("Saved date!")
+    print("Saved")
     return 0
 
-# Function to save reminder message
-def save_reminder_body(msg):
-    global row_filled  # Ensure consistency with row updates
-    sheet.update_cell(row_filled, 2, msg)
-    print("Saved reminder message!")
-    return 0
