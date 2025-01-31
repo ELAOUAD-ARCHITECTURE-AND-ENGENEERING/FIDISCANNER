@@ -1,0 +1,10 @@
+services:
+  - name: my-python-backend
+    type: web
+    runtime: docker
+    repo: https://github.com/ELAOUAD-ARCHITECTURE-AND-ENGENEERING/FIDISCANNER
+    branch: main
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
